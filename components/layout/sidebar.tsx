@@ -46,7 +46,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-border px-4">
         <LogoMark className="h-9 w-9 shrink-0" />
-        {!collapsed && <span className="text-lg font-bold tracking-tight">HRI</span>}
+        {!collapsed && (
+          <div className="min-w-0">
+            <span className="block text-lg font-bold tracking-tight">HRI</span>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -54,20 +58,21 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {navigation.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                collapsed && 'justify-center px-0',
-              )}
-            >
-              <item.icon className="h-5 w-5 shrink-0" />
-              {!collapsed && <span>{item.name}</span>}
-            </Link>
+            <div key={item.name}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                  isActive
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                  collapsed && 'justify-center px-0',
+                )}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                {!collapsed && <span>{item.name}</span>}
+              </Link>
+            </div>
           );
         })}
       </nav>

@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { LogOut, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LanguageSelect } from '@/components/i18n/language-select';
@@ -29,8 +30,28 @@ export function TopNav() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 lg:px-8">
-      <div>
+      <div className="flex min-w-0 items-center gap-3">
         <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
+        <span className="flex min-w-0 items-center gap-1.5 truncate border-l border-border pl-3 text-xs font-medium text-muted-foreground">
+          <span className="truncate">Financed and supported by EU</span>
+          <Image
+            src="/flags/eu.svg"
+            alt="EU flag"
+            width={21}
+            height={14}
+            unoptimized
+            className="h-3.5 w-[21px] shrink-0 rounded-[2px] object-cover"
+          />
+          <span className="truncate">and Government of Moldova</span>
+          <Image
+            src="/flags/md.svg"
+            alt="Moldova flag"
+            width={28}
+            height={14}
+            unoptimized
+            className="h-3.5 w-7 shrink-0 rounded-[2px] object-cover"
+          />
+        </span>
       </div>
       <div className="flex items-center gap-4">
         <LanguageSelect />

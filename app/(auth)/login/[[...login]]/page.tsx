@@ -7,13 +7,12 @@ import { LanguageSelect } from '@/components/i18n/language-select';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function signIn(nextUsername = username, nextPassword = password) {
     setError('');
     setLoading(true);
 
@@ -21,7 +20,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: nextUsername, password: nextPassword }),
       });
 
       if (res.ok) {
@@ -36,6 +35,17 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await signIn();
+  }
+
+  async function handleDevSignIn() {
+    setUsername('admin');
+    setPassword('admin');
+    await signIn('admin', 'admin');
   }
 
   return (
@@ -91,6 +101,15 @@ export default function LoginPage() {
             className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleDevSignIn}
+            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            Enter development mode
           </button>
         </form>
 

@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LogOut, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageSelect } from '@/components/i18n/language-select';
+import { LanguageToggle } from '@/components/i18n/language-toggle';
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -54,7 +54,7 @@ export function TopNav() {
         </span>
       </div>
       <div className="flex items-center gap-4">
-        <LanguageSelect />
+        <LanguageToggle />
         <ThemeToggle />
         <DevUserMenu />
       </div>

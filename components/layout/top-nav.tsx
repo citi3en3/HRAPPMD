@@ -2,19 +2,20 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { LogOut, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LanguageToggle } from '@/components/i18n/language-toggle';
 
 const routeTitles: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/audit': 'Organizational Audit',
-  '/job-descriptions': 'Job Descriptions',
-  '/raci': 'RACI Matrix',
-  '/library': 'Document Library',
-  '/results': 'Results',
-  '/pricing': 'Pricing',
-  '/settings': 'Settings',
+  '/dashboard': 'navigation.dashboard',
+  '/audit': 'navigation.audit',
+  '/job-descriptions': 'navigation.jobDescriptions',
+  '/raci': 'navigation.raci',
+  '/library': 'navigation.library',
+  '/results': 'navigation.results',
+  '/pricing': 'navigation.pricing',
+  '/settings': 'navigation.settings',
 };
 
 function getPageTitle(pathname: string): string {
@@ -26,14 +27,16 @@ function getPageTitle(pathname: string): string {
 
 export function TopNav() {
   const pathname = usePathname();
-  const title = getPageTitle(pathname);
+  const t = useTranslations('App');
+  const titleKey = getPageTitle(pathname);
+  const title = titleKey === 'HRI' ? titleKey : t(titleKey);
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
         <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
         <span className="flex min-w-0 items-center gap-1.5 truncate border-l border-border pl-3 text-xs font-medium text-muted-foreground">
-          <span className="truncate">Financed and supported by EU</span>
+          <span className="truncate">{t('funding.eu')}</span>
           <Image
             src="/flags/eu.svg"
             alt="EU flag"
@@ -42,7 +45,7 @@ export function TopNav() {
             unoptimized
             className="h-3.5 w-[21px] shrink-0 rounded-[2px] object-cover"
           />
-          <span className="truncate">and Government of Moldova</span>
+          <span className="truncate">{t('funding.moldova')}</span>
           <Image
             src="/flags/md.svg"
             alt="Moldova flag"
@@ -64,6 +67,7 @@ export function TopNav() {
 
 function DevUserMenu() {
   const router = useRouter();
+  const t = useTranslations('App');
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -75,14 +79,14 @@ function DevUserMenu() {
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <User className="h-4 w-4" />
-        <span>Admin</span>
+        <span>{t('user.admin')}</span>
       </div>
       <button
         onClick={handleLogout}
         className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors"
       >
         <LogOut className="h-4 w-4" />
-        Logout
+        {t('user.logout')}
       </button>
     </div>
   );

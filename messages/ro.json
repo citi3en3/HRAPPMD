@@ -1,4 +1,35 @@
 {
+  "App": {
+    "language": "Limbă",
+    "navigation": {
+      "dashboard": "Tablou de bord",
+      "audit": "Audit organizațional",
+      "jobDescriptions": "Fișe de post",
+      "raci": "Matrice RACI",
+      "library": "Bibliotecă de documente",
+      "results": "Rezultate",
+      "pricing": "Pricing",
+      "settings": "Setări"
+    },
+    "funding": {
+      "eu": "Financed and supported by EU",
+      "moldova": "and Government of Moldova"
+    },
+    "user": {
+      "admin": "Administrator",
+      "logout": "Deconectare"
+    },
+    "dashboard": {
+      "title": "Bun venit în HRI",
+      "description": "Tabloul tău de bord HR alimentat de AI. Începe cu un audit organizațional.",
+      "progress": {
+        "audit": "Audit",
+        "jobDescriptions": "Fișe de post",
+        "raci": "Matrice RACI",
+        "exports": "Exporturi"
+      }
+    }
+  },
   "Legacy": {
     "Admin": "Administrator",
     "Administrator": "Administrator",

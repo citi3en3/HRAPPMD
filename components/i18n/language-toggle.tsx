@@ -7,11 +7,20 @@ import { type Locale, locales, usePathname, useRouter } from '@/i18n/routing';
 
 const languageOptions: Record<Locale, { label: string; flagSrc: string }> = {
   en: { label: 'English', flagSrc: '/flags/us.svg' },
+  fr: { label: 'Français', flagSrc: '/flags/fr.svg' },
+  es: { label: 'Español', flagSrc: '/flags/es.svg' },
+  it: { label: 'Italiano', flagSrc: '/flags/it.svg' },
+  de: { label: 'Deutsch', flagSrc: '/flags/de.svg' },
+  pl: { label: 'Polski', flagSrc: '/flags/pl.svg' },
+  sk: { label: 'Slovenčina', flagSrc: '/flags/sk.svg' },
+  sr: { label: 'Srpski', flagSrc: '/flags/rs.svg' },
   ro: { label: 'Română', flagSrc: '/flags/ro.svg' },
+  ru: { label: 'Русский', flagSrc: '/flags/ru.svg' },
+  uk: { label: 'Українська', flagSrc: '/flags/ua.svg' },
 };
 
 export function LanguageToggle() {
-  const t = useTranslations('Legacy');
+  const t = useTranslations('App');
   const locale = useLocale() as Locale;
   const pathname = usePathname();
   const router = useRouter();
@@ -26,7 +35,7 @@ export function LanguageToggle() {
 
   return (
     <label className="flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted">
-      <span className="sr-only">{t('Language')}</span>
+      <span className="sr-only">{t('language')}</span>
       <Image
         src={selectedLanguage.flagSrc}
         alt=""
@@ -40,7 +49,7 @@ export function LanguageToggle() {
         value={locale}
         disabled={isPending}
         onChange={(event) => switchLocale(event.target.value as Locale)}
-        aria-label={t('Language')}
+        aria-label={t('language')}
         className="bg-transparent text-sm font-medium text-foreground outline-none disabled:opacity-60"
       >
         {locales.map((optionLocale) => (

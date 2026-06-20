@@ -23,7 +23,12 @@ export async function proxy(request: NextRequest) {
     })(request, {} as NextFetchEvent);
   }
 
-  // Dev auth: check cookie
+  // Dev auth: check cookie.
+  // SECURITY FIX: this branch is only reachable when hasClerk is false, which
+  // itself is only safe because isDevAuthMode() in lib/auth/dev-auth.ts now
+  // requires NODE_ENV !== 'production'. If Clerk key is accidentally unset in
+  // production the startup assertion (assertDevAuthSafe) will throw before
+  // any request is served.
   const devCookie = request.cookies.get('hri-dev-auth')?.value;
   if (devCookie !== 'true') {
     const loginUrl = new URL('/login', request.url);

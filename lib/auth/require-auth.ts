@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma/client';
 import { isDevAuthMode, getDevSession, DEV_USER } from './dev-auth';
 
 async function getClerkId(): Promise<string | null> {
+  // SECURITY FIX: isDevAuthMode() (see lib/auth/dev-auth.ts) now requires
+  // NODE_ENV !== 'production' so this branch cannot execute in production.
   if (isDevAuthMode()) {
     return getDevSession();
   }
@@ -28,6 +30,7 @@ export async function requireOrg() {
   });
 
   // Auto-seed dev user on first request
+  // SECURITY FIX: isDevAuthMode() (see lib/auth/dev-auth.ts) is false in production.
   if (!user && isDevAuthMode()) {
     const org = await prisma.organization.create({
       data: { name: 'Admin Organization' },

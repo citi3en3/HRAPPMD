@@ -2,11 +2,25 @@ import { prisma } from '@/lib/prisma/client';
 import { ok, err, type ServiceResult } from '@/lib/errors/service-error';
 import type { SaveRaciInput, RaciCell, RoleStub } from '../schemas/raci.schemas';
 import { track } from '@/lib/telemetry/events';
+import {
+  detectValidationIssues,
+  generateRepairSuggestions as suggestRepairs,
+} from '../domain/ai-repair';
+import type { RepairSuggestion } from '../domain/ai-repair';
+import {
+  checkOrgAccess,
+  detectAndMigrate,
+  validateReferentialIntegrity,
+  type ReferentialIntegrityIssue,
+} from '../domain/persistence';
 
+/**
+ * Persists a RACI matrix and returns repair suggestions when validation issues are detected.
+ */
 export async function saveRaciMatrix(
   input: SaveRaciInput,
   organizationId: string,
-): Promise<ServiceResult<{ id: string }>> {
+): Promise<ServiceResult<{ id: string; repairSuggestions?: RepairSuggestion[] }>> {
   try {
     const matrixJson = {
       roles: input.roles ?? [],
@@ -22,12 +36,20 @@ export async function saveRaciMatrix(
     });
 
     track('raci.saved', { matrixId: matrix.id, name: input.name });
+    const issues = detectValidationIssues(matrixJson);
+    if (issues.length > 0) {
+      return ok({ id: matrix.id, repairSuggestions: suggestRepairs(issues) });
+    }
+
     return ok({ id: matrix.id });
   } catch {
     return err('RACI_SAVE_ERROR', 'Failed to save RACI matrix');
   }
 }
 
+/**
+ * Loads a RACI matrix, migrates legacy persisted formats, and reports integrity warnings.
+ */
 export async function getRaciMatrix(
   matrixId: string,
   organizationId: string,
@@ -38,36 +60,43 @@ export async function getRaciMatrix(
     roles: RoleStub[];
     cells: RaciCell[];
     createdAt: Date;
+    warnings?: ReferentialIntegrityIssue[];
   }>
 > {
   try {
-    const matrix = await prisma.raciMatrix.findFirst({
-      where: { id: matrixId, organizationId },
+    const matrix = await prisma.raciMatrix.findUnique({
+      where: { id: matrixId },
     });
 
-    if (!matrix) {
+    if (!matrix || !checkOrgAccess(matrix.organizationId, organizationId)) {
       return err('RACI_NOT_FOUND', 'RACI matrix not found');
     }
 
-    // Handle both old format (flat cells array) and new format ({ roles, cells })
     const json = matrix.matrixJson as unknown;
-    let roles: RoleStub[] = [];
-    let cells: RaciCell[];
+    const rawRecord = Array.isArray(json)
+      ? { name: matrix.name, cells: json }
+      : { name: matrix.name, ...(json as object) };
+    let migrated: ReturnType<typeof detectAndMigrate>;
 
-    if (Array.isArray(json)) {
-      cells = json as RaciCell[];
-    } else {
-      const structured = json as { roles?: RoleStub[]; cells: RaciCell[] };
-      roles = structured.roles ?? [];
-      cells = structured.cells;
+    try {
+      migrated = detectAndMigrate(rawRecord);
+    } catch {
+      return err('RACI_MIGRATION_ERROR', 'Failed to migrate RACI matrix');
     }
+
+    const warnings = validateReferentialIntegrity({
+      name: migrated.data.name ?? matrix.name,
+      roles: migrated.data.roles,
+      cells: migrated.data.cells,
+    });
 
     return ok({
       id: matrix.id,
-      name: matrix.name,
-      roles,
-      cells,
+      name: migrated.data.name ?? matrix.name,
+      roles: migrated.data.roles,
+      cells: migrated.data.cells,
       createdAt: matrix.createdAt,
+      ...(warnings.length > 0 && { warnings }),
     });
   } catch {
     return err('RACI_FETCH_ERROR', 'Failed to fetch RACI matrix');
@@ -84,17 +113,20 @@ export async function listRaciMatrices(organizationId: string) {
   return matrices;
 }
 
+/**
+ * Updates a RACI matrix after verifying organization access through the domain access guard.
+ */
 export async function updateRaciMatrix(
   matrixId: string,
   input: Partial<SaveRaciInput>,
   organizationId: string,
 ): Promise<ServiceResult<{ id: string }>> {
   try {
-    const existing = await prisma.raciMatrix.findFirst({
-      where: { id: matrixId, organizationId },
+    const existing = await prisma.raciMatrix.findUnique({
+      where: { id: matrixId },
     });
 
-    if (!existing) {
+    if (!existing || !checkOrgAccess(existing.organizationId, organizationId)) {
       return err('RACI_NOT_FOUND', 'RACI matrix not found');
     }
 

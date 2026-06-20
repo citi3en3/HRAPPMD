@@ -7,9 +7,37 @@ const DEV_USER = {
   name: 'Admin',
 };
 
-/** True when Clerk keys are not configured */
+/**
+ * True ONLY when both conditions hold:
+ *   1. NODE_ENV is not 'production'
+ *   2. NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is absent
+ * Either condition alone is NOT sufficient to activate dev-auth mode.
+ * See: SECURITY FIX below.
+ */
 export function isDevAuthMode(): boolean {
-  return !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  // SECURITY FIX: require non-production environment in addition to absent Clerk key.
+  // Previously only checked for absent Clerk key, which would silently activate
+  // the bypass in production if the env var was accidentally unset.
+  return process.env.NODE_ENV !== 'production' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+}
+
+/**
+ * Call at server startup (e.g. in instrumentation.ts or the top of a
+ * long-lived module) to ensure dev-auth never reaches production silently.
+ * SECURITY FIX: throws immediately if both Clerk key is absent AND we are
+ * running in production, preventing a misconfigured deploy from falling back
+ * to the dev bypass.
+ */
+export function assertDevAuthSafe(): void {
+  // SECURITY FIX: hard-fail if production is missing the Clerk key so the
+  // process never starts with the dev bypass active.
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    throw new Error(
+      '[HRI] SECURITY: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not set in production. ' +
+        'The dev-auth bypass must never run in production. ' +
+        'Set the Clerk publishable key before deploying.',
+    );
+  }
 }
 
 /** Read the dev session cookie. Returns the dev clerkId or null. */

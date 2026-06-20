@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { LogoMark } from '@/components/logo';
+import { LanguageSelect } from '@/components/i18n/language-select';
 import { ArrowRight, ClipboardCheck, FileText, Grid3X3, BarChart3, Sparkles } from 'lucide-react';
 
 const features = [
@@ -37,6 +38,7 @@ export default function HomePage() {
             <span className="text-lg font-bold tracking-tight">HRI</span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSelect />
             <Link href="/login">
               <Button variant="ghost">Sign In</Button>
             </Link>

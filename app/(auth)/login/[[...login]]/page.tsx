@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogoMark } from '@/components/logo';
+import { LanguageSelect } from '@/components/i18n/language-select';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,6 +40,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="absolute right-6 top-6">
+        <LanguageSelect />
+      </div>
       <div className="w-full max-w-sm space-y-6 rounded-2xl border border-border bg-card p-8 shadow-lg">
         <div className="flex flex-col items-center space-y-3">
           <LogoMark className="h-14 w-14" />

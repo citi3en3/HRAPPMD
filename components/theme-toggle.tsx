@@ -1,19 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 
-function getInitialTheme(): boolean {
-  if (typeof window === 'undefined') return false;
+function getStoredTheme(): boolean {
   const stored = localStorage.getItem('hri-theme');
-  const prefersDark =
-    stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.classList.toggle('dark', prefersDark);
-  return prefersDark;
+  return (
+    stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  );
 }
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(getInitialTheme);
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setDark(getStoredTheme()));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   function toggle() {
     const next = !dark;

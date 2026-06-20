@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { LanguageSelect } from '@/components/i18n/language-select';
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -31,6 +32,7 @@ export function TopNav() {
         <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
       </div>
       <div className="flex items-center gap-4">
+        <LanguageSelect />
         <ThemeToggle />
         <DevUserMenu />
       </div>

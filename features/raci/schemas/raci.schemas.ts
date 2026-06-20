@@ -2,6 +2,11 @@ import { z } from 'zod';
 
 const RaciValueSchema = z.enum(['R', 'A', 'C', 'I', '']);
 
+export const RoleStubSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+});
+
 export const RaciCellSchema = z.object({
   roleId: z.string(),
   activity: z.string(),
@@ -10,6 +15,7 @@ export const RaciCellSchema = z.object({
 
 export const SaveRaciSchema = z.object({
   name: z.string().min(1, 'Matrix name is required'),
+  roles: z.array(RoleStubSchema).optional(),
   cells: z.array(RaciCellSchema).min(1, 'At least one cell is required'),
 });
 
@@ -21,5 +27,6 @@ export const GenerateRaciInputSchema = z.object({
 
 export type RaciValue = z.infer<typeof RaciValueSchema>;
 export type RaciCell = z.infer<typeof RaciCellSchema>;
+export type RoleStub = z.infer<typeof RoleStubSchema>;
 export type SaveRaciInput = z.infer<typeof SaveRaciSchema>;
 export type GenerateRaciInput = z.infer<typeof GenerateRaciInputSchema>;

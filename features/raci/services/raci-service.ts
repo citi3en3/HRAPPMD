@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma/client';
 import { ok, err, type ServiceResult } from '@/lib/errors/service-error';
-import type { SaveRaciInput, RaciCell } from '../schemas/raci.schemas';
+import type { SaveRaciInput, RaciCell, RoleStub } from '../schemas/raci.schemas';
 import { track } from '@/lib/telemetry/events';
 
 export async function saveRaciMatrix(
@@ -8,11 +8,16 @@ export async function saveRaciMatrix(
   organizationId: string,
 ): Promise<ServiceResult<{ id: string }>> {
   try {
+    const matrixJson = {
+      roles: input.roles ?? [],
+      cells: input.cells,
+    };
+
     const matrix = await prisma.raciMatrix.create({
       data: {
         organizationId,
         name: input.name,
-        matrixJson: JSON.parse(JSON.stringify(input.cells)),
+        matrixJson: JSON.parse(JSON.stringify(matrixJson)),
       },
     });
 
@@ -30,6 +35,7 @@ export async function getRaciMatrix(
   ServiceResult<{
     id: string;
     name: string;
+    roles: RoleStub[];
     cells: RaciCell[];
     createdAt: Date;
   }>
@@ -43,10 +49,24 @@ export async function getRaciMatrix(
       return err('RACI_NOT_FOUND', 'RACI matrix not found');
     }
 
+    // Handle both old format (flat cells array) and new format ({ roles, cells })
+    const json = matrix.matrixJson as unknown;
+    let roles: RoleStub[] = [];
+    let cells: RaciCell[];
+
+    if (Array.isArray(json)) {
+      cells = json as RaciCell[];
+    } else {
+      const structured = json as { roles?: RoleStub[]; cells: RaciCell[] };
+      roles = structured.roles ?? [];
+      cells = structured.cells;
+    }
+
     return ok({
       id: matrix.id,
       name: matrix.name,
-      cells: matrix.matrixJson as unknown as RaciCell[],
+      roles,
+      cells,
       createdAt: matrix.createdAt,
     });
   } catch {
@@ -82,7 +102,9 @@ export async function updateRaciMatrix(
       where: { id: matrixId },
       data: {
         ...(input.name && { name: input.name }),
-        ...(input.cells && { matrixJson: JSON.parse(JSON.stringify(input.cells)) }),
+        ...(input.cells && {
+          matrixJson: JSON.parse(JSON.stringify({ roles: input.roles ?? [], cells: input.cells })),
+        }),
       },
     });
 

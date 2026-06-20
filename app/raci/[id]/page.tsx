@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { motionPresets } from '@/lib/utils/motion';
-import type { RaciCell, RaciValue } from '@/features/raci/schemas/raci.schemas';
+import type { RaciCell, RaciValue, RoleStub } from '@/features/raci/schemas/raci.schemas';
 
 const RACI_COLORS: Record<string, string> = {
   R: 'bg-[#1F2179] text-white',
@@ -29,6 +29,7 @@ const RACI_LABELS: Record<string, string> = {
 interface RaciDetail {
   id: string;
   name: string;
+  roles: RoleStub[];
   cells: RaciCell[];
   createdAt: string;
 }
@@ -69,6 +70,7 @@ export default function RaciDetailPage() {
     cellMap.set(`${cell.roleId}::${cell.activity}`, cell.value);
   }
 
+  const roleTitle = new Map(matrix.roles.map((r) => [r.id, r.title]));
   const roleIdArray = Array.from(roleIds);
   const activityArray = Array.from(activities);
 
@@ -106,7 +108,7 @@ export default function RaciDetailPage() {
                 <th className="p-3 text-left font-medium">Activity</th>
                 {roleIdArray.map((roleId) => (
                   <th key={roleId} className="p-3 text-center font-medium min-w-[80px]">
-                    {roleId.slice(0, 8)}…
+                    {roleTitle.get(roleId) ?? roleId.slice(0, 8) + '…'}
                   </th>
                 ))}
               </tr>

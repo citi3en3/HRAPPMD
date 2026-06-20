@@ -11,6 +11,7 @@ import {
   Grid3X3,
   Library,
   BarChart3,
+  Coins,
   Settings,
   ChevronLeft,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'RACI Matrix', href: '/raci', icon: Grid3X3 },
   { name: 'Library', href: '/library', icon: Library },
   { name: 'Results', href: '/results', icon: BarChart3 },
+  { name: 'Pricing', href: '/pricing', icon: Coins },
 ];
 
 const bottomNavigation = [{ name: 'Settings', href: '/settings', icon: Settings }];

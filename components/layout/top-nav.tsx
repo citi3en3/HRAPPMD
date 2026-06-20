@@ -12,6 +12,7 @@ const routeTitles: Record<string, string> = {
   '/raci': 'RACI Matrix',
   '/library': 'Document Library',
   '/results': 'Results',
+  '/pricing': 'Pricing',
   '/settings': 'Settings',
 };
 
